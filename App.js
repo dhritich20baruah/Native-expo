@@ -1,34 +1,128 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button, TextInput, Alert } from 'react-native';
-import { useState } from 'react';
+// import State from "./components/state";
+// import Radio from "./components/Radio";
+// import { StatusBar } from "expo-status-bar";
+// import Child from "./components/Child";
+// import Flatslist from "./components/Flatslist";
+// import Sectional from "./components/Sectional";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  Alert,
+  Image,
+  ImageBackground,
+  TouchableOpacity,
+} from "react-native";
+import { useEffect, useState } from "react";
+import * as SQLite from "expo-sqlite";
 
 export default function App() {
-  const [text, setText] = useState('')
-  const [count, setCount] = useState(0)
+  const [text, setText] = useState("");
+  const [notes, setNotes] = useState([]);
 
-  const handleInputChange = (inputText) => {
-    setText(inputText)
-  }
-  const handlePress = () => {
-    Alert.alert("Input Value", text)
+  //database
+  const db = SQLite.openDatabase("example.db");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, note TEXT)"
+      );
+    });
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM notes",
+        null,
+        (txObj, resultSet) => setNotes(resultSet.rows._array),
+        (txObj, error) => console.log(error)
+      );
+    });
+    setIsLoading(false);
+  }, []);
+
+  // names == notes ; currentName == text
+  const addNote = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO notes (note) values (?)",
+        [text],
+        (txObj, resultSet) => {
+          let existingNote = [...notes];
+          existingNote.push({ id: resultSet.insertId, note: text });
+          setNotes(existingNote);
+          setText("");
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  };
+
+  const deleteNote = (id) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "DELETE FROM notes WHERE id = ?",
+        [id],
+        (txObj, resultSet) => {
+          if (resultSet.rowsAffected > 0) {
+            let existingNote = [...notes].filter((note) => note.id != id);
+            setNotes(existingNote);
+          }
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  };
+
+  const updateNote = (id) => {
+    console.log(id)
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT note FROM notes  WHERE id = ?", 
+        [id],
+        (txObj, resultSet) => setText(resultSet.rows._array[0].note),
+        (txObj, error) => console.log(error)
+      );
+    });
   }
 
-  const increment = () => {
-    setCount(count + 1)
-  }
-
-  const decrement = () => {
-    setCount(count - 1)
-  }
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Hello World!!</Text>
-      <TextInput onChangeText={handleInputChange} value={text} placeholder='Enter text here' style={styles.input}/>
-      <Button title="submit" onPress={handlePress}/>
-      <Text style={styles.text}>{count}</Text>
-      <Button title="increment" onPress={increment}/>
-      <Button title="decrement" onPress={decrement}/>
-      <StatusBar style="auto"/>
+      <Text style={styles.text}>Notes</Text>
+      <TextInput
+        onChangeText={setText}
+        value={text}
+        placeholder="Note"
+        style={styles.input}
+      />
+      <TouchableOpacity onPress={addNote} style={styles.button}>
+        <Text style={styles.buttonText}>ADD</Text>
+      </TouchableOpacity>
+      {isLoading ? (
+        <View style={styles.displayData}>
+          <Text>Loading...</Text>
+        </View>
+      ) : (
+        <View style={styles.displayData}>
+          {notes.map((item) => {
+            return (
+              <View key={item.id} style={{ display: "flex", flexDirection: 'row'}}>
+                <Text style={styles.note}>
+                  {item.id}. {item.note}{" "}
+                </Text>
+                <TouchableOpacity onPress={()=>deleteNote(item.id)} style={styles.deleteBtn}>
+                  <Text style={styles.buttonText}>DELETE</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={()=>updateNote(item.id)} style={styles.editBtn}>
+                  <Text style={styles.buttonText}>EDIT</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
@@ -36,19 +130,84 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    margin: 20,
   },
   text: {
-    color: 'red',
+    color: "red",
     fontSize: 25,
     margin: 5,
   },
   input: {
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: "gray",
     padding: 10,
-    width: 100
-  }
+    width: "auto",
+  },
+  container2: {
+    margin: 10,
+    backgroundColor: "gray",
+  },
+  button: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  displayData: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "column",
+  },
+  deleteBtn: {
+    backgroundColor: "red",
+    padding: 2,
+    margin: 5,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 80
+  },
+  editBtn: {
+    backgroundColor: "blue",
+    padding: 2,
+    margin: 5,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 80
+  },
+  note: {
+    width: 200,
+    margin: 5,
+    padding: 3,
+    fontSize: 20,
+    backgroundColor: "#D3D3D3",
+  },
 });
+
+{
+  /* <StatusBar style="auto"/>
+      <View style={styles.container2}>
+        <Child name="Nobody" country="Nowhere"/>
+      </View>
+      <Radio/> */
+}
+{
+  /* <State/> */
+}
+{
+  /* <Flatslist/> */
+}
+{
+  /* <Image source={require('./assets/reactNative.jpg')}/> */
+}
+{
+  /* <Sectional/> */
+}
