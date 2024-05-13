@@ -1,9 +1,9 @@
 // import State from "./components/state";
 // import Radio from "./components/Radio";
-// import { StatusBar } from "expo-status-bar";
 // import Child from "./components/Child";
 // import Flatslist from "./components/Flatslist";
 // import Sectional from "./components/Sectional";
+import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
   Text,
@@ -16,11 +16,14 @@ import {
 } from "react-native";
 import { useEffect, useState } from "react";
 import * as SQLite from "expo-sqlite";
+import CameraFunction from "./components/Camera";
+
 
 export default function App() {
   const [text, setText] = useState("");
   const [notes, setNotes] = useState([]);
-
+  const [visible, setVisible] = useState(false)
+  const [noteId, setNoteId] = useState('')
   //database
   const db = SQLite.openDatabase("example.db");
   const [isLoading, setIsLoading] = useState(true);
@@ -76,8 +79,9 @@ export default function App() {
     });
   };
 
-  const updateNote = (id) => {
-    console.log(id)
+  const editNote = (id) => {
+    setNoteId(id)
+    setVisible(true)
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT note FROM notes  WHERE id = ?", 
@@ -88,6 +92,31 @@ export default function App() {
     });
   }
 
+  const updateNote = () => {
+    console.log(noteId, text)
+    db.transaction((tx) => {
+      tx.executeSql(
+        "UPDATE notes set note = ?  WHERE id = ?", 
+        [text, noteId],
+        (txObj, resultSet) =>{
+          if (resultSet.rowsAffected > 0) {
+            setNotes((prevNotes) => {
+              return prevNotes.map((note) => {
+                if (note.id === noteId){
+                  return {...note, note: text}
+                }
+                return note
+              })
+            })
+            setText("");
+            setVisible(false)
+          }
+        },
+        (txObj, error) => console.log(error)
+      );
+    });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Notes</Text>
@@ -97,9 +126,15 @@ export default function App() {
         placeholder="Note"
         style={styles.input}
       />
+      {visible?
+      <TouchableOpacity onPress={updateNote} style={styles.button}>
+        <Text style={styles.buttonText}>UPDATE</Text>
+      </TouchableOpacity>
+      :
       <TouchableOpacity onPress={addNote} style={styles.button}>
         <Text style={styles.buttonText}>ADD</Text>
       </TouchableOpacity>
+      }
       {isLoading ? (
         <View style={styles.displayData}>
           <Text>Loading...</Text>
@@ -115,7 +150,7 @@ export default function App() {
                 <TouchableOpacity onPress={()=>deleteNote(item.id)} style={styles.deleteBtn}>
                   <Text style={styles.buttonText}>DELETE</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=>updateNote(item.id)} style={styles.editBtn}>
+                <TouchableOpacity onPress={()=>editNote(item.id)} style={styles.editBtn}>
                   <Text style={styles.buttonText}>EDIT</Text>
                 </TouchableOpacity>
               </View>
@@ -123,6 +158,7 @@ export default function App() {
           })}
         </View>
       )}
+    {/* <CameraFunction/>   */}
     </View>
   );
 }

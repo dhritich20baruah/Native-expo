@@ -47,20 +47,20 @@ const styles = StyleSheet.create({
 });
 
 // const updateNote = (id) => {
-  //   db.transaction((tx) => {
-  //     tx.executeSql(
-  //       "UPDATE notes set note = ?  WHERE id = ?", 
-  //       [text, id],
-  //       (txObj, resultSet) => {
-  //         if (resultSet.rowsAffected > 0) {
-  //           let existingNote = [...notes];
-  //           const indexToUpdate = existingNote.findIndex(note => note.id === id)
-  //           existingNote[indexToUpdate].note = text;
-  //           setNotes(text);
-  //           setText("")
-  //         }
-  //       },
-  //       (txObj, error) => console.log(error)
-  //     );
-  //   });
-  // }
+//     db.transaction((tx) => {
+//       tx.executeSql(
+//         "UPDATE notes set note = ?  WHERE id = ?", 
+//         [text, id],
+//         (txObj, resultSet) => {
+//           if (resultSet.rowsAffected > 0) {
+//             let existingNote = [...notes];
+//             const indexToUpdate = existingNote.findIndex(note => note.id === id)
+//             existingNote[indexToUpdate].note = text;
+//             setNotes(text);
+//             setText("")
+//           }
+//         },
+//         (txObj, error) => console.log(error)
+//       );
+//     });
+//   }
