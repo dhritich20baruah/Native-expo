@@ -16,7 +16,7 @@ import * as MediaLibrary from "expo-media-library";
 
 export default function CameraFunction() {
   let cameraRef = useRef();
-  const [hasCameraPermission, setHasCameraPermission] = useState();
+  const [hasCameraPermission, setHasCameraPermission] = useState(true);
   const [hasMediaLibPermit, setHasMediaLibPermit] = useState();
   const [photo, setPhoto] = useState();
 

@@ -158,7 +158,7 @@ export default function App() {
           })}
         </View>
       )}
-    {/* <CameraFunction/>   */}
+    {/*  <CameraFunction/>   */}
     </View>
   );
 }
