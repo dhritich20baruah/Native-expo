@@ -17,15 +17,23 @@ import {
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import CalendarComponent from "./components/Calender";
+import Calendar_list from "./components/Calendar_list";
+import DatePickerComponent from "./components/DatePicker";
+import WheelPicker from "./components/WheelPicker";
 
 export default function App() {
   return (
-    <View style={{ margin: 25, flex: 1, justifyContent: "center" }}>
+    <ScrollView>
+    <View style={{ margin: 25 }}>
       <Text style={{ textAlign: "center" }}>React Native App</Text>
       <CalendarComponent
-        onDayPress={(day) => Alert.alert(`Date pressed: ${day.dateString}`)}
-      />
+        onDaySelect={(day) => console.log(`Date selected: ${day.dateString}`)}
+        />
+        <WheelPicker/>
+      {/* <Calendar_list/> */}
+      {/* <DatePickerComponent/> */}
     </View>
+    </ScrollView>
   );
 }
 
