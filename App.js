@@ -20,18 +20,22 @@ import CalendarComponent from "./components/Calender";
 import Calendar_list from "./components/Calendar_list";
 import DatePickerComponent from "./components/DatePicker";
 import WheelPicker from "./components/WheelPicker";
+// import OCRCamera from "./components/OCRCamera";
+// import OCRScreen from "./components/OCRScreen";
 
 export default function App() {
   return (
     <ScrollView>
     <View style={{ margin: 25 }}>
       <Text style={{ textAlign: "center" }}>React Native App</Text>
-      <CalendarComponent
+      {/* <CalendarComponent
         onDaySelect={(day) => console.log(`Date selected: ${day.dateString}`)}
         />
-        <WheelPicker/>
+        <WheelPicker/> */}
       {/* <Calendar_list/> */}
       {/* <DatePickerComponent/> */}
+      {/* <OCRCamera/> */}
+      {/* <OCRScreen/> */}
     </View>
     </ScrollView>
   );
